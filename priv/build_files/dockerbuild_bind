@@ -1,0 +1,11 @@
+FROM alpine:latest
+VOLUME ~/test:/data
+RUN echo "hello-world!!!!" > "/data/myfile${EX_DOCKER_BUILD_TAG}.txt"
+RUN echo "DOCKER_TEST_USERNAME: ${DOCKER_TEST_USERNAME}" >> "/data/myfile${EX_DOCKER_BUILD_TAG}.txt"
+RUN echo "DOCKER_TEST_PASSWORD: ${DOCKER_TEST_PASSWORD}" >> "/data/myfile${EX_DOCKER_BUILD_TAG}.txt"
+RUN echo "TEST_VAR: ${TEST_VAR}" >> "/data/myfile${EX_DOCKER_BUILD_TAG}.txt"
+RUN echo "EX_DOCKER_BUILD_TAG: ${EX_DOCKER_BUILD_TAG}" >> "/data/myfile${EX_DOCKER_BUILD_TAG}.txt"
+RUN echo "EX_DOCKER_BUILD_ZIP: ${EX_DOCKER_BUILD_ZIP}" >> "/data/myfile${EX_DOCKER_BUILD_TAG}.txt"
+RUN echo "EX_DOCKER_BUILD_TAR: ${EX_DOCKER_BUILD_TAR}" >> "/data/myfile${EX_DOCKER_BUILD_TAG}.txt"
+RUN echo "EX_DOCKER_BUILD_COMMIT: ${EX_DOCKER_BUILD_COMMIT}" >> "/data/myfile${EX_DOCKER_BUILD_TAG}.txt"
+CMD ["cat", "/data/myfile${EX_DOCKER_BUILD_TAG}.txt"]
