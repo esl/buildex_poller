@@ -2,7 +2,8 @@ defmodule Buildex.Poller.SetupWorkerTest do
   use ExUnit.Case, async: false
   import Mox
 
-  alias Buildex.Poller.{SetupWorker, PollerSupervisor, Poller}
+  alias Buildex.Poller
+  alias Buildex.Poller.{SetupWorker, PollerSupervisor}
   alias Buildex.Poller.Repository.GithubFake
 
   # Make sure mocks are verified when the test exits
@@ -104,8 +105,8 @@ defmodule Buildex.Poller.SetupWorkerTest do
     assert :ok =
              wait_for(fn ->
                %{workers: num} = DynamicSupervisor.count_children(PollerSupervisor)
-               num == 1
                :timer.sleep(200)
+               num == 1
              end)
 
     worker_pid = Process.whereis(:f@k3)

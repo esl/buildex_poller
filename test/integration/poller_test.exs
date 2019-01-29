@@ -4,7 +4,7 @@ defmodule Buildex.Poller.Integration.PollerTest do
 
   alias AMQP.Basic
 
-  alias Buildex.Poller.Poller
+  alias Buildex.Poller
   alias Buildex.Poller.Repository.GithubFake
   alias Buildex.Common.Repos.Repo
   alias Buildex.Common.Tags.Tag

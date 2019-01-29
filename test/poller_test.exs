@@ -1,16 +1,16 @@
-defmodule Buildex.Poller.PollerTest do
+defmodule Buildex.PollerTest do
   use ExUnit.Case, async: false
   import Mox
 
   import ExUnit.CaptureLog
 
-  alias Buildex.Poller.Poller
+  alias Buildex.Poller
   alias Buildex.Poller.Repository.GithubFake
   alias Buildex.Common.Repos.Repo
   alias Buildex.Common.Tags.Tag
 
-  alias BugsBunny.FakeRabbitMQ
-  alias BugsBunny.Worker.RabbitConnection
+  alias ExRabbitPool.FakeRabbitMQ
+  alias ExRabbitPool.Worker.RabbitConnection
 
   # Make sure mocks are verified when the test exits
   setup :set_mox_global
@@ -249,7 +249,7 @@ defmodule Buildex.Poller.PollerTest do
     repo = Repo.new("https://github.com/elixir-lang/elixir")
     pid = start_supervised!({Poller, {self(), repo, GithubFake, pool_id}})
 
-    BugsBunny.with_channel(pool_id, fn {:ok, _channel} ->
+    ExRabbitPool.with_channel(pool_id, fn {:ok, _channel} ->
       log =
         capture_log(fn ->
           Poller.poll(pid)
