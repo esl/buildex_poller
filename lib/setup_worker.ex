@@ -2,7 +2,7 @@ defmodule Buildex.Poller.SetupWorker do
   use GenServer
   require Logger
 
-  alias Buildex.Poller.Supervisor, as: PS
+  alias Buildex.Poller.PollerSupervisor, as: PS
   alias Buildex.Poller.Config
 
   def start_link(_) do

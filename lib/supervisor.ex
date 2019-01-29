@@ -1,10 +1,11 @@
-defmodule Buildex.Poller.Supervisor do
+defmodule Buildex.Poller.PollerSupervisor do
   use DynamicSupervisor
 
   alias Buildex.Poller
   alias Buildex.Common.Repos.Repo
   alias Buildex.Poller.Config
 
+  @spec start_link(keyword()) :: :ignore | {:error, any()} | {:ok, pid()}
   def start_link(args \\ []) do
     name = Keyword.get(args, :name, __MODULE__)
     DynamicSupervisor.start_link(__MODULE__, [], name: name)

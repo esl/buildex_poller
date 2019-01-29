@@ -3,7 +3,7 @@ defmodule Buildex.Poller.PollerSupervisorTest do
   import Mock
 
   alias Buildex.Poller
-  alias Buildex.Poller.Supervisor, as: PS
+  alias Buildex.Poller.PollerSupervisor, as: PS
   alias Buildex.Poller.Config
   alias Buildex.Common.Tasks.Runners.DockerBuild
   alias Buildex.Poller.Repository.GithubFake

@@ -1,7 +1,7 @@
 defmodule Buildex.Poller.SetupSupervisor do
   use Supervisor
 
-  alias Buildex.Poller.SetupWorker
+  alias Buildex.Poller.{PollerSupervisor, SetupWorker}
 
   def start_link(args \\ []) do
     name = Keyword.get(args, :name, __MODULE__)
@@ -10,7 +10,7 @@ defmodule Buildex.Poller.SetupSupervisor do
 
   def init(_) do
     children = [
-      {Buildex.Poller.Supervisor, []},
+      {PollerSupervisor, []},
       {SetupWorker, []}
     ]
 
