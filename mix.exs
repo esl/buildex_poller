@@ -30,7 +30,11 @@ defmodule Buildex.Poller.MixProject do
       {:poison, "~> 4.0"},
       {:httpoison, "~> 1.3.0", override: true},
       {:meck, "0.8.13", override: true, only: :test},
-      {:mox, "~> 0.4", only: :test}
+      {:mox, "~> 0.4", only: :test},
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.10.4", only: [:dev, :test], runtime: false},
+      {:distillery, "~> 2.0"},
+      {:confex, "~> 3.4.0"}
     ]
   end
 end
