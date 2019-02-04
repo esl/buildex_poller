@@ -45,10 +45,6 @@ defmodule Buildex.Poller.Config do
     Application.get_env(:buildex_poller, :priv_dir, priv_dir)
   end
 
-  def get_database() do
-    Application.get_env(:buildex_poller, :database, Buildex.Common.Services.Database)
-  end
-
   def get_database_reconnection_interval() do
     Application.get_env(:buildex_poller, :database_reconnect, 5000)
   end

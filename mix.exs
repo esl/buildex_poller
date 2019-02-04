@@ -26,7 +26,8 @@ defmodule Buildex.Poller.MixProject do
       # use master because there aren't newer releases and master has an API function we need
       {:mock, "~> 0.3.2", only: :test},
       {:ex_rabbit_pool, git: "https://github.com/esl/ex_rabbitmq_pool.git", branch: "master"},
-      {:buildex_common, git: "https://github.com/esl/buildex_common.git", branch: "master"},
+      {:buildex_common,
+       git: "https://github.com/esl/buildex_common.git", branch: "master"},
       {:poison, "~> 4.0"},
       {:httpoison, "~> 1.3.0", override: true},
       {:meck, "0.8.13", override: true, only: :test},

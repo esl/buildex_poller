@@ -18,8 +18,9 @@ defmodule Buildex.Poller.SetupWorker do
   @impl true
   def handle_info(:after_init, state) do
     # TODO: keep trying if rpc call to get all repositories fails
-    with {:ok, repositories} <- Config.get_database().get_all_repositories(),
+    with {:ok, repositories} <- Buildex.Common.Services.Database.get_all_repositories(),
          :ok <- start_repositories_workers(repositories) do
+      Logger.info("database node is up")
       {:noreply, state}
     else
       {:error, :nodedown} ->

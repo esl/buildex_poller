@@ -1,5 +1,7 @@
 use Mix.Config
 
+config :buildex_common, :admin_node, :"buildex_api@127.0.0.1"
+
 config :buildex_poller, :rabbitmq_config,
   channels: 10,
   queue: "new_releases.queue",

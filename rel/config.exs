@@ -19,6 +19,7 @@ release :buildex_poller do
   set(
     applications: [
       :runtime_tools,
+      :logger,
       ex_rabbit_pool: :permanent,
       buildex_common: :permanent,
       buildex_poller: :permanent

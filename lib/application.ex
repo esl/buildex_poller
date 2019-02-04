@@ -9,6 +9,9 @@ defmodule Buildex.Poller.Application do
 
   def start(_type, _args) do
     # List all child processes to be supervised
+
+    Confex.resolve_env!(:buildex_poller)
+
     rabbitmq_config = Config.get_rabbitmq_config()
     rabbitmq_conn_pool = Config.get_connection_pool_config()
 
