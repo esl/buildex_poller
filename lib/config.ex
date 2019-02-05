@@ -1,4 +1,10 @@
 defmodule Buildex.Poller.Config do
+  @callback get_all_repositories() :: atom()
+  @callback get_connection_pool_config() :: atom()
+  @callback get_connection_pool_id() :: atom()
+
+  @callback get_database_reconnection_interval() :: integer()
+
   def get_github_access_token() do
     Application.get_env(:buildex_poller, :github_auth, System.get_env("GITHUB_AUTH"))
   end

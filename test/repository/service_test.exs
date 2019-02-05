@@ -1,25 +1,21 @@
 defmodule Buildex.Poller.Api.ServiceTest do
   use ExUnit.Case, async: false
-  import Mock
+  use MecksUnit.Case
 
   alias Buildex.Poller.Repository.{Service, Github, GithubFake}
   alias Buildex.Common.Repos.Repo
   alias Buildex.Common.Tags.Tag
   alias Tentacat.Repositories.Tags
 
-  setup do
-    repo = Repo.new("https://github.com/elixir-lang/elixir")
-    {:ok, repo: repo}
-  end
-
-  test "calls real github adapter", %{repo: repo} do
-    lambda_list = fn _, _, _ ->
+  defmock Tentacat.Repositories.Tags do
+    def list(_, "elixir-lang", "elixir") do
       []
     end
+  end
 
-    with_mock Tags, list: lambda_list do
-      assert {:ok, []} == Service.get_tags(Github, repo)
-    end
+  mocked_test "calls github adapter" do
+    repo = Repo.new("https://github.com/elixir-lang/elixir")
+    assert {:ok, []} == Service.get_tags(Github, repo)
   end
 
   test "calls fake github adapter", %{repo: repo} do

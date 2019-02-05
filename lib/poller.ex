@@ -127,7 +127,7 @@ defmodule Buildex.Poller do
   @spec update_repo_tags(Repo.t(), list(Tag.t()), State.t()) ::
           {:ok, State.t()} | {:error, :out_of_retries}
   defp update_repo_tags(repo, tags, state) do
-    case Config.get_database().get_all_tags(repo.url) do
+    case Buildex.Common.Services.Database.get_all_tags(repo.url) do
       {:error, _} = error ->
         error
 
@@ -201,7 +201,7 @@ defmodule Buildex.Poller do
         Logger.info("success publishing new release #{tag.name} for #{repo.url}")
         if caller, do: send(caller, {:job_published, job_payload})
 
-        case Config.get_database().create_tag(repo.url, tag) do
+        case Buildex.Common.Services.Database.create_tag(repo.url, tag) do
           {:ok, _} ->
             Logger.info("success creating new tag #{tag.name} for #{repo.url}")
 

@@ -1,19 +1,14 @@
 defmodule Buildex.Poller.Api.GithubTest do
   use ExUnit.Case, async: false
-  import Mock
+
+  use MecksUnit.Case
 
   alias Buildex.Poller.Repository.Github
   alias Buildex.Common.Repos.Repo
   alias Buildex.Common.Tags.Tag
-  alias Tentacat.Repositories.Tags
 
-  setup do
-    repo = Repo.new("https://github.com/elixir-lang/elixir")
-    {:ok, repo: repo}
-  end
-
-  test "gets all tags from a repo", %{repo: repo} do
-    lambda_list = fn _, _, _ ->
+  defmock Tentacat.Repositories.Tags do
+    def list(_, "elixir-lang", "elixir") do
       [
         %{
           "commit" => %{
@@ -51,31 +46,15 @@ defmodule Buildex.Poller.Api.GithubTest do
       ]
     end
 
-    with_mock Tags, list: lambda_list do
-      assert {:ok, tags} = Github.get_tags(repo)
-      assert length(tags) == 3
-      assert %Tag{name: "v1.7.2"} = hd(tags)
-    end
-  end
-
-  test "returns error tuple when failed to fetch tags", %{repo: repo} do
-    lambda_list = fn _, _, _ ->
+    def list(_, "bad-org", "bad-repo") do
       {404, %{"message" => "Repository not found."},
        %HTTPoison.Response{status_code: 404, body: %{"message" => "Repository not found."}}}
     end
 
-    with_mock Tags, list: lambda_list do
-      assert {:error, %{"message" => "Repository not found."}} == Github.get_tags(repo)
-    end
-  end
+    def list(_, "hit", "retry") do
+      now = DateTime.utc_now()
+      in_1_hour = DateTime.to_unix(now) + 60 * 60
 
-  test "returns error tuple with retry interval when rate limited from to fetching tags", %{
-    repo: repo
-  } do
-    now = DateTime.utc_now()
-    in_1_hour = DateTime.to_unix(now) + 60 * 60
-
-    lambda_list = fn _, _, _ ->
       {403, %{"message" => "Repository not found."},
        %HTTPoison.Response{
          status_code: 403,
@@ -87,36 +66,17 @@ defmodule Buildex.Poller.Api.GithubTest do
        }}
     end
 
-    with_mock Tags, list: lambda_list do
-      assert {:error, :rate_limit, retry} = Github.get_tags(repo)
-      # sometimes the retry interval returns 3_600_000, 3_590_000, ... due to timing
-      assert retry <= 3_600_000 and retry > 3_590_000
-    end
-  end
-
-  test "returns error tuple when posion raises and exception", %{
-    repo: repo
-  } do
-    error = %HTTPoison.Error{id: nil, reason: :timeout}
-
-    lambda_list = fn _, _, _ ->
+    def list(_, "raise", "exception") do
+      error = %HTTPoison.Error{id: nil, reason: :timeout}
       raise error
     end
 
-    with_mock Tags, list: lambda_list do
-      assert {:error, ^error} = Github.get_tags(repo)
-    end
-  end
+    def list(_, "abuse", "limit") do
+      payload_response = %{
+        "message" => "You have...",
+        "documentation_url" => "https://developer.github.com/v3/#abuse-rate-limits"
+      }
 
-  test "returns error tuple when forbidden to fetch tags with a different reason than rate limiting",
-       %{repo: repo} do
-    payload_response = %{
-      "message" =>
-        "You have triggered an abuse detection mechanism and have been temporarily blocked from content creation. Please retry your request again later.",
-      "documentation_url" => "https://developer.github.com/v3/#abuse-rate-limits"
-    }
-
-    lambda_list = fn _, _, _ ->
       {404, payload_response,
        %HTTPoison.Response{
          status_code: 404,
@@ -126,9 +86,39 @@ defmodule Buildex.Poller.Api.GithubTest do
          ]
        }}
     end
+  end
 
-    with_mock Tags, list: lambda_list do
-      assert {:error, ^payload_response} = Github.get_tags(repo)
-    end
+  defmock Buildex.Poller.Config do
+    def get_connection_pool_id(), do: :random_id
+  end
+
+  mocked_test "verify tags behavior" do
+    repo = Repo.new("https://github.com/elixir-lang/elixir")
+
+    Task.async(fn ->
+      assert {:ok, tags} = Github.get_tags(repo)
+      assert length(tags) == 3
+      assert %Tag{name: "v1.7.2"} = hd(tags)
+    end)
+    |> Task.await()
+
+    repo = Repo.new("https://github.com/bad-org/bad-repo")
+
+    assert {:error, %{"message" => "Repository not found."}} == Github.get_tags(repo)
+
+    # returns error tuple with retry interval when rate limited from to fetching tags
+    repo = Repo.new("https://github.com/hit/retry")
+
+    assert {:error, :rate_limit, retry} = Github.get_tags(repo)
+    # sometimes the retry interval returns 3_600_000, 3_590_000, ... due to timing
+    assert retry <= 3_600_000 and retry > 3_590_000
+
+    # return error tuple when poison raises an exception"
+    repo = Repo.new("https://github.com/raise/exception")
+
+    assert {:error, %HTTPoison.Error{id: nil, reason: :timeout}} = Github.get_tags(repo)
+
+    repo = Repo.new("https://github.com/abuse/limit")
+    assert {:error, %{"message" => "You have..."}} = Github.get_tags(repo)
   end
 end
