@@ -12,6 +12,8 @@ defmodule Buildex.PollerTest do
   alias ExRabbitPool.FakeRabbitMQ
   alias ExRabbitPool.Worker.RabbitConnection
 
+  @queue "test.new_releases.queue"
+
   # Make sure mocks are verified when the test exits
   setup :set_mox_global
   setup :verify_on_exit!
@@ -24,13 +26,17 @@ defmodule Buildex.PollerTest do
     rabbitmq_config = [
       channels: 1,
       port: String.to_integer(System.get_env("POLLER_RMQ_PORT") || "5672"),
-      queue: "new_releases.queue",
-      exchange: "",
+      queues: [
+        [
+          queue_name: @queue,
+          exchange: "",
+          queue_options: [auto_delete: true],
+          exchange_options: [auto_delete: true]
+        ]
+      ],
       adapter: FakeRabbitMQ,
       caller: caller,
       reconnect: 10,
-      queue_options: [auto_delete: true],
-      exchange_options: [auto_delete: true]
     ]
 
     rabbitmq_conn_pool = [
@@ -44,6 +50,8 @@ defmodule Buildex.PollerTest do
 
     Application.put_env(:buildex_poller, :rabbitmq_config, rabbitmq_config)
     Application.put_env(:buildex_poller, :database, Buildex.Common.Service.MockDatabase)
+    Application.put_env(:buildex_poller, :queue, @queue)
+    Application.put_env(:buildex_poller, :exchange, "")
 
     start_supervised!(%{
       id: ExRabbitPool.PoolSupervisorTest,

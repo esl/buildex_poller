@@ -21,13 +21,11 @@ defmodule Buildex.Poller.Config do
   end
 
   def get_rabbitmq_queue() do
-    get_rabbitmq_config()
-    |> Keyword.fetch!(:queue)
+    Application.fetch_env!(:buildex_poller, :queue)
   end
 
   def get_rabbitmq_exchange() do
-    get_rabbitmq_config()
-    |> Keyword.fetch!(:exchange)
+    Application.fetch_env!(:buildex_poller, :exchange)
   end
 
   def get_rabbitmq_client() do
