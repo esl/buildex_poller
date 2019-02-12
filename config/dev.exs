@@ -8,7 +8,7 @@ config :buildex_poller, :rabbitmq_config,
   channels: 10,
   queues: [
     [
-      queue: "new_releases.queue",
+      queue_name: "new_releases.queue",
       exchange: ""
     ]
   ]

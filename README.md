@@ -57,7 +57,7 @@ config :builex_poller, :rabbitmq_config,
 config :builex_poller, :rabbitmq_conn_pool,
   pool_id: POOL_NAME,
   name: {:local, POOL_NAME},
-  worker_module: BugsBunny.Worker.RabbitConnection,
+  worker_module: ExRabbitPool.Worker.RabbitConnection,
   size: 2,
   max_overflow: 0
 ```
