@@ -1,9 +1,17 @@
 use Mix.Config
 
-config :buildex_poller, :rabbitmq_config,
-  channels: 10,
+config :buildex_poller,
   queue: "new_releases.queue",
   exchange: ""
+
+config :buildex_poller, :rabbitmq_config,
+  channels: 10,
+  queues: [
+    [
+      queue: "new_releases.queue",
+      exchange: ""
+    ]
+  ]
 
 config :buildex_poller, :rabbitmq_conn_pool,
   pool_id: :connection_pool,
