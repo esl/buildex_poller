@@ -14,7 +14,7 @@ defmodule Buildex.Poller.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :confex],
       mod: {Buildex.Poller.Application, []}
     ]
   end
@@ -22,6 +22,7 @@ defmodule Buildex.Poller.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:confex, "~> 3.4.0"},
       {:tentacat, "~> 1.1.0"},
       # use master because there aren't newer releases and master has an API function we need
       {:mock, "~> 0.3.2", only: :test},
