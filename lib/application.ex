@@ -5,7 +5,7 @@ defmodule Buildex.Poller.Application do
 
   use Application
 
-  alias Buildex.Poller.{SetupSupervisor, Config}
+  alias Buildex.Poller.{SetupWorker, Config, ClusterConnector}
 
   def start(_type, _args) do
     # List all child processes to be supervised
@@ -15,7 +15,10 @@ defmodule Buildex.Poller.Application do
     children = [
       {ExRabbitPool.PoolSupervisor,
        [rabbitmq_config: rabbitmq_config, rabbitmq_conn_pool: rabbitmq_conn_pool]},
-      {SetupSupervisor, []}
+      {Horde.Registry, [name: Buildex.DistributedRegistry, keys: :unique]},
+      {Horde.Supervisor, [name: Buildex.DistributedSupervisor, strategy: :one_for_one]},
+      {ClusterConnector, []},
+      {SetupWorker, []}
     ]
 
     # if for some reason the Supervisor of the RabbitMQ connection pool is terminated we should

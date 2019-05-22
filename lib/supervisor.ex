@@ -1,27 +1,15 @@
 defmodule Buildex.Poller.PollerSupervisor do
-  use DynamicSupervisor
-
   alias Buildex.Poller
   alias Buildex.Common.Repos.Repo
   alias Buildex.Poller.Config
 
-  @spec start_link(keyword()) :: :ignore | {:error, any()} | {:ok, pid()}
-  def start_link(args \\ []) do
-    name = Keyword.get(args, :name, __MODULE__)
-    DynamicSupervisor.start_link(__MODULE__, [], name: name)
-  end
-
-  def init(_) do
-    DynamicSupervisor.init(strategy: :one_for_one)
-  end
-
-  def start_child(%Repo{} = repo) do
+  def start_child(%Repo{name: name} = repo) do
     pool_id = Config.get_connection_pool_id()
 
     adapter = setup_adapter(repo.adapter)
 
-    DynamicSupervisor.start_child(__MODULE__, %{
-      id: "poller_#{repo.name}",
+    Horde.Supervisor.start_child(Buildex.DistributedSupervisor, %{
+      id: "poller_#{name}",
       start: {Poller, :start_link, [{repo, adapter, pool_id}]},
       restart: :transient
     })
@@ -38,21 +26,15 @@ defmodule Buildex.Poller.PollerSupervisor do
   end
 
   def stop_child(repository_url) do
-    repo = Repo.new(repository_url)
+    %{name: name} = Repo.new(repository_url)
 
-    try do
-      repo.name
-      |> String.to_existing_atom()
-      |> Process.whereis()
-      |> case do
-        nil ->
-          {:error, "Couldn't find repository process."}
+    Horde.Registry.lookup(Buildex.DistributedRegistry, name)
+    |> case do
+      :undefined ->
+        {:error, "Couldn't find repository process."}
 
-        pid when is_pid(pid) ->
-          DynamicSupervisor.terminate_child(__MODULE__, pid)
-      end
-    rescue
-      _ -> {:error, "Couldn't find repository process."}
+      [{pid, _value}] when is_pid(pid) ->
+        Horde.Supervisor.terminate_child(Buildex.DistributedSupervisor, pid)
     end
   end
 
