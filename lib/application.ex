@@ -13,6 +13,7 @@ defmodule Buildex.Poller.Application do
     rabbitmq_conn_pool = Config.get_connection_pool_config()
 
     children = [
+      {Cluster.Supervisor, [Config.get_cluster_topologies()]},
       {ExRabbitPool.PoolSupervisor,
        [rabbitmq_config: rabbitmq_config, rabbitmq_conn_pool: rabbitmq_conn_pool]},
       {Horde.Registry, [name: Buildex.DistributedRegistry, keys: :unique]},

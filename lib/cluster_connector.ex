@@ -1,51 +1,58 @@
 defmodule Buildex.Poller.ClusterConnector do
+  @moduledoc """
+  Dynamic cluster membership
+  """
   use GenServer
 
   require Logger
-
-  alias Buildex.Poller.Config
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, [])
   end
 
   def init(_) do
-    cluster_nodes = Config.get_nodes()
-
-    cluster_nodes
-    |> List.delete(Node.self())
-    |> connect_nodes()
+    cluster_nodes = get_nodes()
 
     :ok = join_cluster(cluster_nodes)
-
-    schedule_self_heal()
-
-    {:ok, cluster_nodes}
+    schedule_join_cluster()
+    {:ok, MapSet.new(cluster_nodes)}
   end
 
-  def handle_info(:self_heal, cluster_nodes) do
-    connected_nodes = Node.list()
+  def handle_info(:join_cluster, cluster_nodes) do
+    new_cluster_nodes =
+      get_nodes()
+      |> MapSet.new()
 
-    cluster_nodes_not_connected =
+    # only track removed nodes, when adding a new node to the cluster the other
+    # node is in charge of updating the new cluster member list
+    diff =
       cluster_nodes
-      |> List.delete(Node.self())
-      |> Kernel.--(connected_nodes)
+      |> MapSet.difference(new_cluster_nodes)
+      |> MapSet.to_list()
 
-    if not Enum.empty?(cluster_nodes_not_connected) do
-      cluster_nodes_not_connected |> connect_nodes()
-      join_cluster(cluster_nodes)
+    if not Enum.empty?(diff) do
+      new_cluster_nodes
+      |> MapSet.to_list()
+      |> join_cluster()
     end
 
-    schedule_self_heal()
-    {:noreply, cluster_nodes}
+    schedule_join_cluster()
+
+    {:noreply, new_cluster_nodes}
   end
 
-  defp schedule_self_heal() do
-    Process.send_after(self(), :self_heal, 5000)
+  defp schedule_join_cluster() do
+    Process.send_after(self(), :join_cluster, 5000)
   end
 
-  defp connect_nodes(nodes) do
-    for node <- nodes, do: Node.connect(node)
+  defp get_nodes() do
+    [Node.self() | Node.list()]
+    |> Enum.filter(fn node ->
+      case Atom.to_string(node) do
+        "poller" <> _ -> true
+        _ -> false
+      end
+    end)
   end
 
   defp join_cluster(nodes) when is_list(nodes) do

@@ -51,6 +51,10 @@ defmodule Buildex.Poller.Config do
     Application.get_env(:buildex_poller, :database_reconnect, 5000)
   end
 
+  def get_cluster_topologies() do
+    Application.get_env(:libcluster, :topologies)
+  end
+
   def get_nodes() do
     case Application.get_env(:repo_poller, :poller_nodes) do
       nil ->

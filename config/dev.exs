@@ -19,3 +19,11 @@ config :buildex_poller, :rabbitmq_conn_pool,
   worker_module: ExRabbitPool.Worker.RabbitConnection,
   size: 2,
   max_overflow: 0
+
+config :libcluster, :topologies,
+  buildex_poller_cluster: [
+    strategy: Buildex.Poller.Cluster.Strategy.EpmdAutoHeal,
+    config: [
+      hosts: [:"poller1@127.0.0.1", :"poller2@127.0.0.1"]
+    ]
+  ]
