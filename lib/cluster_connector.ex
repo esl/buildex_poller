@@ -6,6 +6,8 @@ defmodule Buildex.Poller.ClusterConnector do
 
   require Logger
 
+  @join_cluster_interval 5000
+
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, [])
   end
@@ -42,7 +44,7 @@ defmodule Buildex.Poller.ClusterConnector do
   end
 
   defp schedule_join_cluster() do
-    Process.send_after(self(), :join_cluster, 5000)
+    Process.send_after(self(), :join_cluster, @join_cluster_interval)
   end
 
   defp get_nodes() do

@@ -3,7 +3,7 @@ defmodule Buildex.Poller.SetupWorkerTest do
   import Mox
 
   alias Buildex.Poller
-  alias Buildex.Poller.{SetupWorker, PollerSupervisor}
+  alias Buildex.Poller.{SetupWorker, ClusterConnector}
   alias Buildex.Poller.Repository.GithubFake
 
   # Make sure mocks are verified when the test exits
@@ -25,6 +25,8 @@ defmodule Buildex.Poller.SetupWorkerTest do
   setup do
     Application.put_env(:buildex_poller, :database, Buildex.Common.Service.MockDatabase)
     Application.put_env(:buildex_poller, :rabbitmq_conn_pool, pool_id: :random)
+    Node.start(:"poller_test@127.0.0.1")
+    :ok
   end
 
   # Silence GenServer stop
@@ -65,17 +67,17 @@ defmodule Buildex.Poller.SetupWorkerTest do
        ]}
     end)
 
+    start_supervised!(ClusterConnector)
     start_supervised!(SetupWorker)
 
     # Wait for children to be created and started
     assert :ok =
              wait_for(fn ->
-               %{workers: num} = DynamicSupervisor.count_children(PollerSupervisor)
+               %{workers: num} = Horde.Supervisor.count_children(Buildex.DistributedSupervisor)
                num > 0
              end)
 
-    worker_pid = Process.whereis(:f@k3)
-    assert worker_pid
+    assert [{worker_pid, _value}] = Horde.Registry.lookup(Buildex.DistributedRegistry, "f@k3")
     assert %{repo: %{url: "https://github.com/no-tags/f@k3"}} = Poller.state(worker_pid)
   end
 
@@ -99,18 +101,18 @@ defmodule Buildex.Poller.SetupWorkerTest do
        ]}
     end)
 
+    start_supervised!(ClusterConnector)
     start_supervised!(SetupWorker)
 
     # Wait for children to be created and started
     assert :ok =
              wait_for(fn ->
-               %{workers: num} = DynamicSupervisor.count_children(PollerSupervisor)
+               %{workers: num} = Horde.Supervisor.count_children(Buildex.DistributedSupervisor)
                :timer.sleep(200)
                num == 1
              end)
 
-    worker_pid = Process.whereis(:f@k3)
-    assert worker_pid
+    assert [{worker_pid, _value}] = Horde.Registry.lookup(Buildex.DistributedRegistry, "f@k3")
     assert %{repo: %{url: "https://github.com/no-tags/f@k3"}} = Poller.state(worker_pid)
   end
 end
