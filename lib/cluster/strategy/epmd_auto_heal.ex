@@ -2,6 +2,7 @@ defmodule Buildex.Poller.Cluster.Strategy.EpmdAutoHeal do
   use GenServer
   use Cluster.Strategy
 
+  alias Cluster.Strategy
   alias Cluster.Strategy.State
 
   def start_link(args) do
@@ -39,7 +40,7 @@ defmodule Buildex.Poller.Cluster.Strategy.EpmdAutoHeal do
   defp connect_nodes([], _), do: :ok
 
   defp connect_nodes(nodes, state) when is_list(nodes) do
-    Cluster.Strategy.connect_nodes(state.topology, state.connect, state.list_nodes, nodes)
+    Strategy.connect_nodes(state.topology, state.connect, state.list_nodes, nodes)
     :ok
   end
 end

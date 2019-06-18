@@ -5,6 +5,7 @@ defmodule Buildex.Poller.ClusterConnector do
   use GenServer
 
   require Logger
+  alias Horde.Cluster
 
   @join_cluster_interval 5000
 
@@ -66,8 +67,8 @@ defmodule Buildex.Poller.ClusterConnector do
         }
       end)
 
-    with :ok <- Horde.Cluster.set_members(Buildex.DistributedSupervisor, supervisor_nodes),
-         :ok <- Horde.Cluster.set_members(Buildex.DistributedRegistry, registry_nodes) do
+    with :ok <- Cluster.set_members(Buildex.DistributedSupervisor, supervisor_nodes),
+         :ok <- Cluster.set_members(Buildex.DistributedRegistry, registry_nodes) do
       :ok
     end
   end
