@@ -83,7 +83,7 @@ defmodule Buildex.Poller.Repository.Github do
   defp new(nil) do
     case Config.get_github_access_token() do
       nil -> Client.new()
-      auth -> Client.new(auth)
+      auth -> Client.new(%{access_token: auth})
     end
   end
 
