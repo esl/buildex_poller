@@ -25,7 +25,8 @@ defmodule Buildex.Poller.SetupWorkerTest do
   setup do
     Application.put_env(:buildex_poller, :database, Buildex.Common.Service.MockDatabase)
     Application.put_env(:buildex_poller, :rabbitmq_conn_pool, name: {:local, :random})
-    Node.start(:"poller_test@127.0.0.1")
+    Node.start(:"poller_test@127.0.0.1") |> IO.inspect(label: "NODE START")
+    start_supervised!(ClusterConnector)
     :ok
   end
 
@@ -67,7 +68,6 @@ defmodule Buildex.Poller.SetupWorkerTest do
        ]}
     end)
 
-    start_supervised!(ClusterConnector)
     start_supervised!(SetupWorker)
 
     # Wait for children to be created and started
@@ -103,7 +103,6 @@ defmodule Buildex.Poller.SetupWorkerTest do
        ]}
     end)
 
-    start_supervised!(ClusterConnector)
     start_supervised!(SetupWorker)
 
     # Wait for children to be created and started

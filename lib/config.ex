@@ -55,7 +55,7 @@ defmodule Buildex.Poller.Config do
   end
 
   def get_cluster_topologies() do
-    Application.get_env(:libcluster, :topologies)
+    Application.get_env(:libcluster, :topologies, [])
   end
 
   def get_nodes() do
