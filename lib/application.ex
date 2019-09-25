@@ -17,7 +17,7 @@ defmodule Buildex.Poller.Application do
       {ExRabbitPool.PoolSupervisor,
        [rabbitmq_config: rabbitmq_config, rabbitmq_conn_pool: rabbitmq_conn_pool]},
       {Horde.Registry, [name: Buildex.DistributedRegistry, keys: :unique]},
-      {Horde.Supervisor, [name: Buildex.DistributedSupervisor, strategy: :one_for_one]},
+      {Horde.DynamicSupervisor, [name: Buildex.DistributedSupervisor, strategy: :one_for_one]},
       {ClusterConnector, []},
       {SetupWorker, []}
     ]

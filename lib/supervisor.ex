@@ -8,7 +8,7 @@ defmodule Buildex.Poller.PollerSupervisor do
 
     adapter = setup_adapter(repo.adapter)
 
-    Horde.Supervisor.start_child(Buildex.DistributedSupervisor, %{
+    Horde.DynamicSupervisor.start_child(Buildex.DistributedSupervisor, %{
       id: "poller_#{name}",
       start: {Poller, :start_link, [{repo, adapter, pool_id}]},
       restart: :transient
@@ -34,7 +34,7 @@ defmodule Buildex.Poller.PollerSupervisor do
         {:error, "Couldn't find repository process."}
 
       [{pid, _value}] when is_pid(pid) ->
-        Horde.Supervisor.terminate_child(Buildex.DistributedSupervisor, pid)
+        Horde.DynamicSupervisor.terminate_child(Buildex.DistributedSupervisor, pid)
     end
   end
 

@@ -73,7 +73,7 @@ defmodule Buildex.Poller.SetupWorkerTest do
     # Wait for children to be created and started
     assert :ok =
              wait_for(fn ->
-               %{workers: num} = Horde.Supervisor.count_children(Buildex.DistributedSupervisor)
+               %{workers: num} = Horde.DynamicSupervisor.count_children(Buildex.DistributedSupervisor)
                num > 0
              end)
 
@@ -107,7 +107,7 @@ defmodule Buildex.Poller.SetupWorkerTest do
     # Wait for children to be created and started
     assert :ok =
              wait_for(fn ->
-               %{workers: num} = Horde.Supervisor.count_children(Buildex.DistributedSupervisor)
+               %{workers: num} = Horde.DynamicSupervisor.count_children(Buildex.DistributedSupervisor)
                :timer.sleep(200)
                num == 1
              end)

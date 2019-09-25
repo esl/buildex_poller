@@ -10,6 +10,7 @@ defmodule Buildex.Poller.Integration.PollerTest do
   alias Buildex.Common.Tags.Tag
   alias Buildex.Common.Jobs.NewReleaseJob
   alias Buildex.Common.Serializers.NewReleaseJobSerializer, as: JobSerializer
+  alias ExRabbitPool.Worker.{RabbitConnection, SetupQueue}
 
   @moduletag :integration
   @queue "test.new_releases.queue"
@@ -36,10 +37,8 @@ defmodule Buildex.Poller.Integration.PollerTest do
     ]
 
     rabbitmq_conn_pool = [
-      :rabbitmq_conn_pool,
-      pool_id: :test_pool,
       name: {:local, :test_pool},
-      worker_module: ExRabbitPool.Worker.RabbitConnection,
+      worker_module: RabbitConnection,
       size: 1,
       max_overflow: 0
     ]
@@ -54,11 +53,13 @@ defmodule Buildex.Poller.Integration.PollerTest do
       start:
         {ExRabbitPool.PoolSupervisor, :start_link,
          [
-           [rabbitmq_config: rabbitmq_config, rabbitmq_conn_pool: rabbitmq_conn_pool],
+           [rabbitmq_config: rabbitmq_config, connection_pools: [rabbitmq_conn_pool]],
            ExRabbitPool.PoolSupervisorTest
          ]},
       type: :supervisor
     })
+
+    start_supervised!({SetupQueue, {:test_pool, [queues: rabbitmq_config[:queues]]}})
 
     n = :rand.uniform(1_000)
     uniq_name = "test-#{n}"
