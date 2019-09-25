@@ -14,7 +14,6 @@ config :buildex_poller, :rabbitmq_config,
   ]
 
 config :buildex_poller, :rabbitmq_conn_pool,
-  pool_id: :connection_pool,
   name: {:local, :connection_pool},
   worker_module: ExRabbitPool.Worker.RabbitConnection,
   size: 2,
