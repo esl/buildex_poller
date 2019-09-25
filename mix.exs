@@ -31,7 +31,7 @@ defmodule Buildex.Poller.MixProject do
       {:httpoison, "~> 1.3.0", override: true},
       {:hackney, "~> 1.13.0", override: true},
       {:meck, "0.8.13", override: true, only: :test},
-      {:mox, "~> 0.4", only: :test},
+      {:mox, "~> 0.5", only: :test},
       {:horde, git: "https://github.com/derekkraan/horde", branch: "master"},
       {:jsx, "~> 2.9", override: true},
       {:libcluster, "~> 3.0.3"}

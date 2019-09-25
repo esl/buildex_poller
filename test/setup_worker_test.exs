@@ -24,7 +24,7 @@ defmodule Buildex.Poller.SetupWorkerTest do
 
   setup do
     Application.put_env(:buildex_poller, :database, Buildex.Common.Service.MockDatabase)
-    Application.put_env(:buildex_poller, :rabbitmq_conn_pool, pool_id: :random)
+    Application.put_env(:buildex_poller, :rabbitmq_conn_pool, name: {:local, :random})
     Node.start(:"poller_test@127.0.0.1")
     :ok
   end
@@ -73,7 +73,9 @@ defmodule Buildex.Poller.SetupWorkerTest do
     # Wait for children to be created and started
     assert :ok =
              wait_for(fn ->
-               %{workers: num} = Horde.DynamicSupervisor.count_children(Buildex.DistributedSupervisor)
+               %{workers: num} =
+                 Horde.DynamicSupervisor.count_children(Buildex.DistributedSupervisor)
+
                num > 0
              end)
 
@@ -107,7 +109,9 @@ defmodule Buildex.Poller.SetupWorkerTest do
     # Wait for children to be created and started
     assert :ok =
              wait_for(fn ->
-               %{workers: num} = Horde.DynamicSupervisor.count_children(Buildex.DistributedSupervisor)
+               %{workers: num} =
+                 Horde.DynamicSupervisor.count_children(Buildex.DistributedSupervisor)
+
                :timer.sleep(200)
                num == 1
              end)
