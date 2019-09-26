@@ -14,18 +14,14 @@ defmodule Buildex.Poller.ClusterConnector do
   end
 
   def init(_) do
-    cluster_nodes = get_nodes() |> IO.inspect(label: "INIT >>>>>> GET NODES")
-
+    cluster_nodes = get_nodes()
     :ok = join_cluster(cluster_nodes)
     schedule_join_cluster()
     {:ok, MapSet.new(cluster_nodes)}
   end
 
   def handle_info(:join_cluster, cluster_nodes) do
-    new_cluster_nodes =
-      get_nodes()
-      |> IO.inspect(label: "JOIN >>>>>> GET NODES")
-      |> MapSet.new()
+    new_cluster_nodes = get_nodes() |> MapSet.new()
 
     # only track removed nodes, when adding a new node to the cluster the other
     # node is in charge of updating the new cluster member list
@@ -51,7 +47,6 @@ defmodule Buildex.Poller.ClusterConnector do
 
   defp get_nodes() do
     [Node.self() | Node.list()]
-    |> IO.inspect(label: ">>>>>> NODE LIST WITH SELF")
     |> Enum.filter(fn node ->
       case Atom.to_string(node) do
         "poller" <> _ -> true

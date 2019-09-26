@@ -11,7 +11,7 @@ defmodule Buildex.Poller.PollerSupervisorTest do
   alias Buildex.Common.Tasks.Task
 
   setup do
-    Node.start(:"poller_test@127.0.0.1") |> IO.inspect(label: "NODE START")
+    Node.start(:"poller_test@127.0.0.1")
     start_supervised!(ClusterConnector)
     :ok
   end
