@@ -19,10 +19,17 @@ defmodule Buildex.Poller.Application do
         [pool_config]
       end
 
+    pool_id =
+      case pool_config[:name] do
+        nil -> nil
+        {_, pool_id} -> pool_id
+      end
+
     children = [
       {Cluster.Supervisor, [Config.get_cluster_topologies()]},
       {ExRabbitPool.PoolSupervisor,
        [rabbitmq_config: rabbitmq_config, connection_pools: rabbitmq_conn_pool]},
+      {ExRabbitPool.Worker.SetupQueue, {pool_id, rabbitmq_config}},
       {Horde.Registry, [name: Buildex.DistributedRegistry, keys: :unique]},
       {Horde.DynamicSupervisor, [name: Buildex.DistributedSupervisor, strategy: :one_for_one]},
       {ClusterConnector, []},

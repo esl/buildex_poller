@@ -10,14 +10,19 @@ defmodule Buildex.Poller.ClusterConnector do
   @join_cluster_interval 5000
 
   def start_link(args) do
-    GenServer.start_link(__MODULE__, args, [])
+    GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
   def init(_) do
     cluster_nodes = get_nodes()
-    :ok = join_cluster(cluster_nodes)
+    :ok = do_join_cluster(cluster_nodes)
     schedule_join_cluster()
     {:ok, MapSet.new(cluster_nodes)}
+  end
+
+  def join_cluster do
+    get_nodes()
+    |> do_join_cluster()
   end
 
   def handle_info(:join_cluster, cluster_nodes) do
@@ -33,7 +38,7 @@ defmodule Buildex.Poller.ClusterConnector do
     if not Enum.empty?(diff) do
       new_cluster_nodes
       |> MapSet.to_list()
-      |> join_cluster()
+      |> do_join_cluster()
     end
 
     schedule_join_cluster()
@@ -55,7 +60,7 @@ defmodule Buildex.Poller.ClusterConnector do
     end)
   end
 
-  defp join_cluster(nodes) when is_list(nodes) do
+  defp do_join_cluster(nodes) when is_list(nodes) do
     {supervisor_nodes, registry_nodes} =
       Enum.reduce(nodes, {[], []}, fn node, {supervisor_nodes, registry_nodes} ->
         {

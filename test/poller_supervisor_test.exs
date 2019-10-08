@@ -12,7 +12,7 @@ defmodule Buildex.Poller.PollerSupervisorTest do
 
   setup do
     Node.start(:"poller_test@127.0.0.1")
-    start_supervised!(ClusterConnector)
+    :ok = ClusterConnector.join_cluster()
     :ok
   end
 

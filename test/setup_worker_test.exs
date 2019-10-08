@@ -26,7 +26,7 @@ defmodule Buildex.Poller.SetupWorkerTest do
     Application.put_env(:buildex_poller, :database, Buildex.Common.Service.MockDatabase)
     Application.put_env(:buildex_poller, :rabbitmq_conn_pool, name: {:local, :random})
     Node.start(:"poller_test@127.0.0.1")
-    start_supervised!(ClusterConnector)
+    :ok = ClusterConnector.join_cluster()
     :ok
   end
 
