@@ -28,11 +28,11 @@ defmodule Buildex.Poller do
   ##############
 
   def start_link({%{name: repo_name}, _adapter, _pool_id} = args) do
-    GenServer.start_link(__MODULE__, args, name: String.to_atom(repo_name))
+    GenServer.start_link(__MODULE__, args, name: via_tuple(repo_name))
   end
 
   def start_link({_caller, %{name: repo_name}, _adapter, _pool_id} = args) do
-    GenServer.start_link(__MODULE__, args, name: String.to_atom(repo_name))
+    GenServer.start_link(__MODULE__, args, name: via_tuple(repo_name))
   end
 
   @doc false
@@ -222,5 +222,9 @@ defmodule Buildex.Poller do
     queue = Config.get_rabbitmq_queue()
     exchange = Config.get_rabbitmq_exchange()
     Config.get_rabbitmq_client().publish(channel, exchange, queue, payload, config)
+  end
+
+  defp via_tuple(name) do
+    {:via, Horde.Registry, {Buildex.DistributedRegistry, name}}
   end
 end

@@ -12,8 +12,11 @@ defmodule Buildex.Poller.Config do
   end
 
   def get_connection_pool_id() do
-    get_connection_pool_config()
-    |> Keyword.fetch!(:pool_id)
+    {_, pool_id} =
+      get_connection_pool_config()
+      |> Keyword.fetch!(:name)
+
+    pool_id
   end
 
   def get_rabbitmq_config() do
@@ -49,5 +52,22 @@ defmodule Buildex.Poller.Config do
 
   def get_database_reconnection_interval() do
     Application.get_env(:buildex_poller, :database_reconnect, 5000)
+  end
+
+  def get_cluster_topologies() do
+    Application.get_env(:libcluster, :topologies, [])
+  end
+
+  def get_nodes() do
+    case Application.get_env(:repo_poller, :poller_nodes) do
+      nil ->
+        "POLLER_NODES"
+        |> System.get_env()
+        |> String.split(",")
+        |> Enum.map(&String.to_atom/1)
+
+      nodes ->
+        nodes
+    end
   end
 end

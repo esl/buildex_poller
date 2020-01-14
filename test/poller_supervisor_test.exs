@@ -4,11 +4,17 @@ defmodule Buildex.Poller.PollerSupervisorTest do
 
   alias Buildex.Poller
   alias Buildex.Poller.PollerSupervisor, as: PS
-  alias Buildex.Poller.Config
+  alias Buildex.Poller.{Config, ClusterConnector}
   alias Buildex.Common.Tasks.Runners.DockerBuild
   alias Buildex.Poller.Repository.GithubFake
   alias Buildex.Common.Repos.Repo
   alias Buildex.Common.Tasks.Task
+
+  setup do
+    Node.start(:"poller_test@127.0.0.1")
+    :ok = ClusterConnector.join_cluster()
+    :ok
+  end
 
   @tag capture_log: true
   test "setups a supervision tree with repo" do
@@ -24,7 +30,6 @@ defmodule Buildex.Poller.PollerSupervisorTest do
     with_mocks [
       {Config, [], [get_connection_pool_id: get_connection_pool_id_fn]}
     ] do
-      start_supervised!({PS, name: :PollerSupervisorTest})
       assert {:ok, child_pid} = PS.start_child(repo)
 
       assert %{
@@ -54,7 +59,6 @@ defmodule Buildex.Poller.PollerSupervisorTest do
     with_mocks [
       {Config, [], [get_connection_pool_id: get_connection_pool_id_fn]}
     ] do
-      start_supervised!({PS, name: :PollerSupervisorTest})
       assert {:ok, child_pid} = PS.start_child(repo)
 
       assert %{

@@ -2,7 +2,7 @@ defmodule Buildex.Poller.SetupWorker do
   use GenServer
   require Logger
 
-  alias Buildex.Poller.PollerSupervisor, as: PS
+  alias Buildex.Poller.PollerSupervisor
   alias Buildex.Poller.Config
 
   def start_link(_) do
@@ -38,7 +38,7 @@ defmodule Buildex.Poller.SetupWorker do
 
   defp start_repositories_workers([repo | rest]) do
     repo
-    |> PS.start_child()
+    |> PollerSupervisor.start_child()
     |> case do
       {:ok, _pid} ->
         start_repositories_workers(rest)

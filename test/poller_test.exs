@@ -10,7 +10,7 @@ defmodule Buildex.PollerTest do
   alias Buildex.Common.Tags.Tag
 
   alias ExRabbitPool.FakeRabbitMQ
-  alias ExRabbitPool.Worker.RabbitConnection
+  alias ExRabbitPool.Worker.{RabbitConnection, SetupQueue}
 
   @queue "test.new_releases.queue"
 
@@ -36,12 +36,10 @@ defmodule Buildex.PollerTest do
       ],
       adapter: FakeRabbitMQ,
       caller: caller,
-      reconnect: 10,
+      reconnect: 10
     ]
 
     rabbitmq_conn_pool = [
-      :rabbitmq_conn_pool,
-      pool_id: pool_id,
       name: {:local, pool_id},
       worker_module: RabbitConnection,
       size: 1,
@@ -58,11 +56,13 @@ defmodule Buildex.PollerTest do
       start:
         {ExRabbitPool.PoolSupervisor, :start_link,
          [
-           [rabbitmq_config: rabbitmq_config, rabbitmq_conn_pool: rabbitmq_conn_pool],
+           [rabbitmq_config: rabbitmq_config, connection_pools: [rabbitmq_conn_pool]],
            ExRabbitPool.PoolSupervisorTest
          ]},
       type: :supervisor
     })
+
+    start_supervised!({SetupQueue, {pool_id, rabbitmq_config}})
 
     {:ok, pool_id: pool_id}
   end

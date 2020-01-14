@@ -55,7 +55,6 @@ config :builex_poller, :rabbitmq_config,
 # RabbitMQ Connection Pool Config
 
 config :builex_poller, :rabbitmq_conn_pool,
-  pool_id: POOL_NAME,
   name: {:local, POOL_NAME},
   worker_module: ExRabbitPool.Worker.RabbitConnection,
   size: 2,
