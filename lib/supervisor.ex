@@ -30,7 +30,7 @@ defmodule Buildex.Poller.PollerSupervisor do
 
     Horde.Registry.lookup(Buildex.DistributedRegistry, name)
     |> case do
-      :undefined ->
+      [] ->
         {:error, "Couldn't find repository process."}
 
       [{pid, _value}] when is_pid(pid) ->
